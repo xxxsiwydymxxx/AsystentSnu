@@ -8,7 +8,7 @@
 #include <RTClib.h>
 #include <btstack.h> 
 
-// --- BTSTACK SETTINGS ---
+
 const char* target_name = "XIAO_Health_Native";
 const uint16_t target_service_uuid = 0xFF00;
 const uint16_t target_char_uuid    = 0xFF01;
@@ -23,24 +23,23 @@ static bool service_found = false;
 static bool char_found = false;
 static bool is_subscribed = false;
 
-// Global variables for display
+
 volatile int global_hr = 0;
 volatile int global_spo2 = 0;
 bool bleConnected = false;
 
-// --- HARDWARE SETTINGS ---
-// 1. I2C 
+
 #define I2C_SDA_PIN 4
 #define I2C_SCL_PIN 5
 #define OLED_RESET  17
 
-// 2. SPI1 
+
 #define SD_SCK  10
 #define SD_MOSI 11
 #define SD_MISO 12
 #define SD_CS   13
 
-// 3. BUTTONS 
+
 #define BTN1_PIN 6
 #define BTN2_PIN 7
 #define BTN3_PIN 8
@@ -61,7 +60,7 @@ const long LOG_PERIOD    = 60000;
 bool sdStatus = false;
 int currentMode = 1; 
 
-// --- FORWARD DECLARATIONS ---
+
 static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packet, uint16_t size);
 static void gatt_event_handler(uint8_t packet_type, uint16_t channel, uint8_t *packet, uint16_t size);
 static void on_characteristics_discovered(uint8_t packet_type, uint16_t channel, uint8_t *packet, uint16_t size);
@@ -80,7 +79,7 @@ void setup() {
   Wire.begin();
   delay(1000);
 
-  // OLED Init
+
   if(!display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR)) {
     Serial.println(F("OLED failed"));
     for(;;);
@@ -92,14 +91,14 @@ void setup() {
   display.println("Init Components...");
   display.display();
 
-  // BME Init
+
   if (!bme.begin(BME_ADDR)) {
     Serial.println("BME280 not found!");
     display.println("BME Fail!");
     display.display();
   }
 
-  // RTC Init
+
   if (!rtc.begin()) {
     Serial.println("RTC not found");
     display.println("RTC Fail!");
@@ -110,7 +109,7 @@ void setup() {
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
   }
 
-  // SD Init
+
   SPI1.setSCK(SD_SCK);
   SPI1.setTX(SD_MOSI);
   SPI1.setRX(SD_MISO);
@@ -131,7 +130,7 @@ void setup() {
     }
   }
 
-  // --- BTSTACK INIT ---
+
   display.println("Init Bluetooth...");
   display.display();
   
@@ -151,12 +150,12 @@ void setup() {
 }
 
 void loop() {
-  // Bluetooth maintenance
+
   delay(10); 
 
   unsigned long currentMillis = millis();
   
-  // Screen Update
+
   if (currentMillis - tsLastReport > REPORT_PERIOD) {
     DateTime now = rtc.now();
     float t = bme.readTemperature();
@@ -172,7 +171,7 @@ void loop() {
     tsLastReport = currentMillis;
   }
 
-  // Logging
+
   if (currentMillis - tsLastLog > LOG_PERIOD) {
     DateTime now = rtc.now();
     float t = bme.readTemperature();
@@ -239,17 +238,17 @@ void updateScreen(DateTime now, float t, float h, float p, bool sdOk, int mode) 
     if(now.second() < 10) display.print('0');
     display.print(now.second());
   }
-  else if (mode == 2) { // --- TYLKO HR I SPO2 ---
-    // Nagłówek
+  else if (mode == 2) { 
+
     display.setTextSize(1);
     display.setCursor(0,0);
     if(bleConnected) display.print("Connected");
     else display.print("Searching...");
 
-    // Linia pozioma
+
     display.drawLine(0, 10, 128, 10, SSD1306_WHITE);
 
-    // Heart Rate (HR)
+
     display.setTextSize(2);
     display.setCursor(0, 18);
     display.print("HR: ");
@@ -258,7 +257,7 @@ void updateScreen(DateTime now, float t, float h, float p, bool sdOk, int mode) 
     display.setTextSize(1);
     display.print(" bpm");
 
-    // SpO2
+
     display.setTextSize(2);
     display.setCursor(0, 42);
     display.print("O2: ");
@@ -267,7 +266,7 @@ void updateScreen(DateTime now, float t, float h, float p, bool sdOk, int mode) 
     display.setTextSize(1);
     display.print(" %");
   }
-  else if (mode == 3) { // DETAILED (WSZYSTKO)
+  else if (mode == 3) { 
     display.setTextSize(1);
     display.setCursor(0, 0);
     if(now.day() < 10) display.print('0');
@@ -289,7 +288,7 @@ void updateScreen(DateTime now, float t, float h, float p, bool sdOk, int mode) 
 
     display.drawLine(0, 30, 128, 30, SSD1306_WHITE);
 
-    // Left Column: Environment
+
     display.setTextSize(1);
     display.setCursor(0, 34);
     display.print("T: "); display.print(t, 1);
@@ -300,7 +299,7 @@ void updateScreen(DateTime now, float t, float h, float p, bool sdOk, int mode) 
 
     display.drawLine(64, 30, 64, 64, SSD1306_WHITE);
 
-    // Right Column: Health
+
     display.setCursor(68, 34);
     display.print("HR: "); 
     if(global_hr > 0) display.print(global_hr);
@@ -315,7 +314,7 @@ void updateScreen(DateTime now, float t, float h, float p, bool sdOk, int mode) 
   display.display();
 }
 
-// --- BTSTACK IMPLEMENTATION ---
+
 
 static void gatt_event_handler(uint8_t packet_type, uint16_t channel, uint8_t *packet, uint16_t size) {
   if (packet_type != HCI_EVENT_PACKET) return;
@@ -348,7 +347,7 @@ static void on_characteristics_discovered(uint8_t packet_type, uint16_t channel,
     if (char_found && !is_subscribed) {
       Serial.println("FORCING SUBSCRIPTION...");
       
-      // --- FORCE SUBSCRIBE LOGIC (MANUAL WRITE) ---
+
       uint16_t cccd_handle = found_char.value_handle + 1;
       uint8_t enable_data[] = {0x01, 0x00};
       
@@ -359,7 +358,7 @@ static void on_characteristics_discovered(uint8_t packet_type, uint16_t channel,
           2, 
           enable_data
       );
-      // --------------------------------------------
+
       
       is_subscribed = true;
     }

@@ -17,7 +17,7 @@ BLEService        customService = BLEService(CUSTOM_SERVICE_UUID);
 BLECharacteristic customChar    = BLECharacteristic(CUSTOM_CHAR_UUID);
 
 void onBeatDetected() {
-    // Flash Green
+
     digitalWrite(LEDG, LOW); delay(20); digitalWrite(LEDG, HIGH);
 }
 
@@ -27,7 +27,7 @@ void setup() {
 
     Serial.begin(115200);
     
-    // Sensor Init
+
     if (!pox.begin()) {
         sensorWorking = false;
         digitalWrite(LEDR, LOW); 
@@ -43,11 +43,11 @@ void setup() {
 
     customService.begin();
 
-    // --- FIX IS HERE ---
+
     customChar.setProperties(CHR_PROPS_NOTIFY | CHR_PROPS_READ);
-    // Allow Open Write access so the Pico can Subscribe
+
     customChar.setPermission(SECMODE_OPEN, SECMODE_OPEN);
-    // -------------------
+
     
     customChar.setFixedLen(2); 
     customChar.begin();
@@ -69,7 +69,7 @@ void loop() {
             bpm = (uint8_t)pox.getHeartRate();
             spo2 = pox.getSpO2();
         } else {
-            bpm = 65; spo2 = 98; // Dummy data
+            bpm = 65; spo2 = 98; 
         }
 
         if (Bluefruit.connected()) {
