@@ -1,0 +1,53 @@
+Date: 19.02.2026
+
+current_version
+main: v2.5
+secondary: v1.5
+
+Version history:
+
+Urządzenie główne:
+v1.0
+	test z modułem bme280
+v1.1
+	test z samym modułem RTC
+v1.2
+	test z modułem RTC i bme280
+v1.3
+	test z modułem microSD card
+v1.4
+	test z modułem heart max30100
+v1.5
+	test z mikrofonem
+v1.6
+	test z modułem bme280 i wyświetlaczem oled
+v1.7
+	test z modułami 280, oled, m5heart max30100
+v1.8
+	test z modułami bme 280, oled, microSD card
+v1.9
+	test z modułami bme 280, oled, microSD card, 4 switches
+v2.0
+	test BLE
+v2.1
+	test BLE z zamianą ról urządzeń
+v2.2
+	test połączenia z telefonem
+v2.3
+	test z biblioteką btstack.h
+v2.4
+	test z biblioteką ArduinoBLE z modułami bme280, oled, microSD card, RTC, 4 switch
+v2.5
+	test z biblioteką btstack.h z modułami oled, microSD card, bme280, RTC, 4 switch
+
+Urządzenie dodatkowe:
+v1.0
+	test blink sketch
+v1.2
+	test blink z modułem heart m5stack max30100
+v1.3
+	test z ArduinoBLE
+v1.4
+	test połączenia z telefonem
+v1.5
+	test z ArduinoBLE z modułem m5stack heart max30100

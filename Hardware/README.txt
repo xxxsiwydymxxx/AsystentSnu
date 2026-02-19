@@ -1,1 +1,0 @@
-Schematy zostały wykonane w programie KiCAD
